@@ -1,9 +1,9 @@
-const User = require("../models/User");
+const users = require('../models/users');
 const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
-} = require("../utils/errors");
+} = require('../utils/errors');
 
 // GET /users — returns all users
 const getUsers = async (req, res) => {
@@ -14,7 +14,7 @@ const getUsers = async (req, res) => {
     console.error(err);
     res
       .status(INTERNAL_SERVER_ERROR)
-      .send({ message: "An error occurred while retrieving users" });
+      .send({ message: 'An error occurred while retrieving users' });
   }
 };
 
@@ -22,7 +22,7 @@ const getUsers = async (req, res) => {
 const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).orFail(() => {
-      const error = new Error("User not found");
+      const error = new Error('User not found');
       error.statusCode = NOT_FOUND;
       throw error;
     });
@@ -34,7 +34,7 @@ const getUser = async (req, res) => {
     }
     res
       .status(INTERNAL_SERVER_ERROR)
-      .send({ message: "An error occurred while retrieving the user" });
+      .send({ message: 'An error occurred while retrieving the user' });
   }
 };
 
@@ -46,7 +46,7 @@ const createUser = async (req, res) => {
     res.status(201).send(user);
   } catch (err) {
     console.error(err);
-    res.status(BAD_REQUEST).send({ message: "Invalid user data" });
+    res.status(BAD_REQUEST).send({ message: 'Invalid user data' });
   }
 };
 

@@ -1,5 +1,5 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
+const mongoose = require('mongoose');
+const validator = require('validator');
 
 // Define the User schema
 const userSchema = new mongoose.Schema({
@@ -14,10 +14,10 @@ const userSchema = new mongoose.Schema({
     required: true,
     validate: {
       validator: (value) => validator.isURL(value),
-      message: "Invalid URL format for avatar",
+      message: 'Invalid URL format for avatar',
     },
   },
 });
 
-// Create the User model
-module.exports = mongoose.model("User", userSchema);
+// Create the user model
+module.exports = mongoose.model('User', userSchema);

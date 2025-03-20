@@ -1,7 +1,7 @@
-const mongoose = require("mongoose");
+const mongoose = require('mongoose');
 
-// Define the ClothingItem schema
-const clothingItemSchema = new mongoose.Schema({
+// Define the clothingItem schema
+const clothingItemschema = new mongoose.Schema({
   name: {
     type: String,
     required: true,
@@ -11,7 +11,7 @@ const clothingItemSchema = new mongoose.Schema({
   weather: {
     type: String,
     required: true,
-    enum: ["hot", "warm", "cold"], // The weather types allowed
+    enum: ['hot', 'warm', 'cold'], // The weather types allowed
   },
   imageUrl: {
     type: String,
@@ -19,13 +19,13 @@ const clothingItemSchema = new mongoose.Schema({
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: "User", // Reference to the User model
+    ref: 'User', // Reference to the User model
     required: true,
   },
   likes: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: "User", // Array of User references for those who liked the item
+      ref: 'User', // Array of User references for those who liked the item
       default: [],
     },
   ],
@@ -35,7 +35,7 @@ const clothingItemSchema = new mongoose.Schema({
   },
 });
 
-// Create the ClothingItem model
-const ClothingItem = mongoose.model("ClothingItem", clothingItemSchema);
+// Create the clothingItem model
+const clothingItems = mongoose.model('clothingItems', clothingItemschema);
 
-module.exports = ClothingItem;
+module.exports = clothingItems;
