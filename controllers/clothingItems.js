@@ -69,14 +69,16 @@ const dislikeItem = async (req, res) => {
       { $pull: { likes: req.user.id } }, // Use 'id' instead of '_id'
       { new: true },
     );
+
     if (!item) {
       return res.status(404).send({ message: 'Item not found' });
     }
-    res.status(200).send(item);
+
+    return res.status(200).send(item); // Explicit return here
   } catch (err) {
-    res
+    return res
       .status(500)
-      .send({ message: 'An error occurred while unliking the item' });
+      .send({ message: 'An error occurred while unliking the item' }); // Explicit return here
   }
 };
 
