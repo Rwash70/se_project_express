@@ -1,8 +1,8 @@
 const express = require("express");
 const mongoose = require("mongoose");
 
-const userRoutes = require("./routes/userRoutes");
-const itemRoutes = require("./routes/itemRoutes");
+const userRoutes = require("./routes/users");
+const clothingItemsRoutes = require("./routes/clothingItems");
 
 const app = express();
 
@@ -31,7 +31,7 @@ app.use((req, res, next) => {
 });
 
 app.use("/users", userRoutes);
-app.use("/items", itemRoutes);
+app.use("/items", clothingItemsRoutes);
 
 app.use((req, res) => {
   res.status(404).send({ message: "Requested resource not found" });
