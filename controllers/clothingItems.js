@@ -15,8 +15,15 @@ const getItems = async (req, res) => {
 // POST /items — creates a new item
 const createItem = async (req, res) => {
   const { name, weather, imageUrl, owner } = req.body;
+
   try {
-    const item = await clothingItems.create({ name, weather, imageUrl, owner });
+    const item = await clothingItems.create({
+      name,
+      weather,
+      imageUrl,
+      owner,
+    });
+
     res.status(201).send(item);
   } catch (err) {
     res.status(400).send({ message: 'Invalid item data' });
@@ -46,7 +53,7 @@ const likeItem = async (req, res) => {
       {
         $addToSet: { likes: req.user.id }, // Use 'id' instead of '_id'
       },
-      { new: true },
+      { new: true }
     );
 
     if (!item) {
@@ -67,7 +74,7 @@ const dislikeItem = async (req, res) => {
     const item = await clothingItems.findByIdAndUpdate(
       req.params.itemId,
       { $pull: { likes: req.user.id } }, // Use 'id' instead of '_id'
-      { new: true },
+      { new: true }
     );
 
     if (!item) {

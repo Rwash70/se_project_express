@@ -1,5 +1,11 @@
 {
   "singleQuote": true,
+  "bracketSpacing": true,
+  "trailingComma": "es5",
+  "object-curly-newline": {
+    "ObjectExpression": "always",
+    "ObjectPattern": "always"
+  },
   "vetur.format.defaultFormatterOptions": {
     "prettier": {
       "singleQuote": true

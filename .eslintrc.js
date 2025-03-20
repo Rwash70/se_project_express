@@ -19,5 +19,13 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
   },
-  rules: { quotes: [2, 'single', { avoidEscape: true }] },
+  rules: {
+    quotes: [2, 'single', { avoidEscape: true }],
+    'object-curly-newline': [
+      'error',
+      {
+        ObjectPattern: 'always', // Ensure this rule is applied to object destructuring
+      },
+    ],
+  },
 };
