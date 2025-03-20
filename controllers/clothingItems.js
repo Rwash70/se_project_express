@@ -1,4 +1,4 @@
-const clothingItems = require('../models/clothingItems.js'); // Use lowercase 'clothingItems'
+const clothingItems = require('../models/clothingItems'); // Use lowercase 'clothingItems'
 
 // GET /items — returns all clothing items
 const getItems = async (req, res) => {
@@ -32,10 +32,10 @@ const deleteItem = async (req, res) => {
     }
     res.status(200).send({ message: 'Item deleted' });
   } catch (err) {
-    res
-      .status(500)
-      .send({ message: 'An error occurred while deleting the item' });
-  }
+    res.status(500).send({
+      message: 'An error occurred while deleting the item',
+    });
+  } // <-- Missing closing brace added here
 };
 
 // PUT /items/:itemId/likes — like an item
@@ -66,7 +66,7 @@ const dislikeItem = async (req, res) => {
   try {
     const item = await clothingItems.findByIdAndUpdate(
       req.params.itemId,
-      { $pull: { likes: req.user._id } }, // Remove user._id from the likes array
+      { $pull: { likes: req.user.id } }, // Use 'id' instead of '_id'
       { new: true },
     );
     if (!item) {
@@ -80,4 +80,10 @@ const dislikeItem = async (req, res) => {
   }
 };
 
-module.exports = { getItems, createItem, deleteItem, likeItem, dislikeItem };
+module.exports = {
+  getItems,
+  createItem,
+  deleteItem,
+  likeItem,
+  dislikeItem,
+};

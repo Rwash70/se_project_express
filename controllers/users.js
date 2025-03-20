@@ -1,4 +1,4 @@
-const users = require('../models/users');
+const User = require('../models/users');
 const {
   BAD_REQUEST,
   NOT_FOUND,
