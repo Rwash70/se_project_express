@@ -39,9 +39,9 @@ const deleteItem = async (req, res) => {
     if (!item) {
       return res.status(404).send({ message: 'Item not found' });
     }
-    res.status(200).send({ message: 'Item deleted' });
+    return res.status(200).send({ message: 'Item deleted' });
   } catch (err) {
-    res.status(500).send({
+    return res.status(500).send({
       message: 'An error occurred while deleting the item',
     });
   } // <-- Missing closing brace added here

@@ -21,12 +21,7 @@ module.exports = {
   },
   rules: {
     quotes: [2, 'single', { avoidEscape: true }],
-    'object-curly-newline': [
-      'error',
-      {
-        ObjectPattern: 'always',
-      },
-    ],
+
     'no-underscore-dangle': [
       'error',
       {

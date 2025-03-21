@@ -41,9 +41,7 @@ const getUser = async (req, res) => {
 
 // POST /users — creates a new user
 const createUser = async (req, res) => {
-  const {
-    name, avatar,
-  } = req.body;
+  const { name, avatar } = req.body;
   try {
     const user = await User.create({ name, avatar });
     res.status(201).send(user);
