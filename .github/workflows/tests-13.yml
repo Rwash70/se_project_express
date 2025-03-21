@@ -1,11 +1,11 @@
-run-name: "Tests Project 13: ${{ github.event.head_commit.message }}"
+run-name: 'Tests Project 13: ${{ github.event.head_commit.message }}'
 
 on:
   push:
     branches:
-      - "**"
+      - '**'
     tags:
-      - "**"
+      - '**'
 
 jobs:
   read_sprint_file:
@@ -55,7 +55,7 @@ jobs:
       - name: Start MongoDB
         uses: supercharge/mongodb-github-action@1.6.0
         with:
-          mongodb-version: "4.4"
+          mongodb-version: '4.4'
       - name: Get testing lib
         run: set -eu && git clone --depth 1 https://github.com/practicum-com/tests-13-public.git
       - name: Installing Dependencies

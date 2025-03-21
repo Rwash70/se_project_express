@@ -24,7 +24,13 @@ module.exports = {
     'object-curly-newline': [
       'error',
       {
-        ObjectPattern: 'always', // Ensure this rule is applied to object destructuring
+        ObjectPattern: 'always',
+      },
+    ],
+    'no-underscore-dangle': [
+      'error',
+      {
+        allow: ['_id'], // Allow _id to be used
       },
     ],
   },

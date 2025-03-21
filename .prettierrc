@@ -6,6 +6,7 @@
     "ObjectExpression": "always",
     "ObjectPattern": "always"
   },
+  "printWidth": 80,
   "vetur.format.defaultFormatterOptions": {
     "prettier": {
       "singleQuote": true

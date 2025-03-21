@@ -14,10 +14,7 @@ const getUsers = async (req, res) => {
     console.error(err);
     res
       .status(INTERNAL_SERVER_ERROR)
-
-      .send({
-        message: 'An error occurred while retrieving users',
-      });
+      .send({ message: 'An error occurred while retrieving users' });
   }
 };
 
@@ -25,17 +22,18 @@ const getUsers = async (req, res) => {
 const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId).orFail(() => {
-      return res.status(404).send({ message: 'User not found' }); // Ensure a return here
+      const error = new Error('User not found');
+      error.statusCode = NOT_FOUND;
+      throw error;
     });
 
-    // Continue processing if user is found...
     return res.status(200).send(user);
   } catch (err) {
     console.error(err);
     if (err.statusCode) {
       return res.status(err.statusCode).send({ message: err.message });
     }
-    res
+    return res
       .status(INTERNAL_SERVER_ERROR)
       .send({ message: 'An error occurred while retrieving the user' });
   }
@@ -43,7 +41,9 @@ const getUser = async (req, res) => {
 
 // POST /users — creates a new user
 const createUser = async (req, res) => {
-  const { name, avatar } = req.body;
+  const {
+    name, avatar,
+  } = req.body;
   try {
     const user = await User.create({ name, avatar });
     res.status(201).send(user);
