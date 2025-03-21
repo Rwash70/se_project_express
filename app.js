@@ -6,20 +6,16 @@ const clothingItemsRoutes = require('./routes/clothingItems');
 
 const app = express();
 
-const {
-  PORT = 3001,
-} = process.env;
+const { PORT = 3001 } = process.env;
 
 mongoose
   .connect('mongodb://127.0.0.1:27017/wtwr_db', {
     useNewUrlParser: true,
     useUnifiedTopology: true,
   })
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
+  .then(() => {})
   .catch((error) => {
-    console.error('Error connecting to MongoDB:', error);
+    console.error('Error:', error); // Log or handle the error
   });
 
 app.use(express.json());

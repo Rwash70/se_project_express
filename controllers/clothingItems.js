@@ -23,12 +23,6 @@ const getItems = async (req, res) => {
 const createItem = async (req, res) => {
   const { name, weather, imageUrl } = req.body;
 
-  if (!req.user || !req.user._id) {
-    return res
-      .status(STATUS_BAD_REQUEST)
-      .send({ message: 'User authentication required' });
-  }
-
   try {
     const newItem = await clothingItems.create({
       name,
@@ -37,14 +31,15 @@ const createItem = async (req, res) => {
       owner: req.user._id, // Assign the user's ID to the owner field
     });
 
-    res.status(STATUS_CREATED).send(newItem);
+    return res.status(STATUS_CREATED).send(newItem); // Ensure you return here
   } catch (err) {
     if (err.name === 'ValidationError') {
       return res
         .status(STATUS_BAD_REQUEST)
         .send({ message: 'Invalid item data' });
     }
-    res
+
+    return res
       .status(STATUS_INTERNAL_SERVER_ERROR)
       .send({ message: 'Failed to create item' });
   }
@@ -81,11 +76,13 @@ const likeItem = async (req, res) => {
       {
         $addToSet: { likes: req.user._id }, // Added underscore to `id`
       },
-      { new: true }
+      { new: true },
     );
 
     if (!item) {
-      return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
+      return res.status(STATUS_NOT_FOUND).send({
+        message: 'Item not found',
+      });
     }
 
     return res.status(STATUS_OK).send(item); // Explicitly return after sending response
@@ -108,7 +105,7 @@ const dislikeItem = async (req, res) => {
     const item = await clothingItems.findByIdAndUpdate(
       req.params.itemId,
       { $pull: { likes: req.user._id } }, // Added underscore to `id`
-      { new: true }
+      { new: true },
     );
 
     if (!item) {
