@@ -1,12 +1,11 @@
 const express = require('express');
-const {
-  getUsers, getUser, createUser,
-} = require('../controllers/users');
+const { getUsers, getUser, createUser } = require('../controllers/users');
 
 const router = express.Router();
 
-router.get('/users', getUsers);
-router.get('/users/:userId', getUser);
-router.post('/users', createUser);
+// Removed 'users' from the path since it's already defined in app.js
+router.get('/', getUsers);
+router.get('/:userId', getUser);
+router.post('/', createUser);
 
 module.exports = router;
