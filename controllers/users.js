@@ -3,7 +3,7 @@ const {
   BAD_REQUEST,
   NOT_FOUND,
   INTERNAL_SERVER_ERROR,
-} = require('../utils/errors');
+} = require('../utils/constants');
 
 // GET /users — returns all users
 const getUsers = async (req, res) => {
@@ -44,10 +44,14 @@ const createUser = async (req, res) => {
   const { name, avatar } = req.body;
   try {
     const user = await User.create({ name, avatar });
-    res.status(201).send(user);
+    return res.status(201).send(user); // Added return
   } catch (err) {
-    console.error(err);
-    res.status(BAD_REQUEST).send({ message: 'Invalid user data' });
+    if (err.name === 'CastError') {
+      return res.status(BAD_REQUEST).send({ message: 'Invalid ID format' });
+    }
+    return res
+      .status(INTERNAL_SERVER_ERROR)
+      .send({ message: 'Internal server error' });
   }
 };
 

@@ -1,5 +1,6 @@
 const express = require('express');
 const mongoose = require('mongoose');
+const { STATUS_NOT_FOUND } = require('./utils/constants'); // Import the constant
 
 const userRoutes = require('./routes/users');
 const clothingItemsRoutes = require('./routes/clothingItems');
@@ -32,7 +33,9 @@ app.use('/users', userRoutes);
 app.use('/items', clothingItemsRoutes);
 
 app.use((req, res) => {
-  res.status(404).send({ message: 'Requested resource not found' });
+  res
+    .status(STATUS_NOT_FOUND)
+    .send({ message: 'Requested resource not found' });
 });
 
 app.listen(PORT, () => {
