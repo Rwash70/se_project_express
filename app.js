@@ -11,12 +11,12 @@ const app = express();
 
 const { PORT = 3001 } = process.env;
 
+// Connect to MongoDB (removed deprecated options)
 mongoose
-  .connect('mongodb://127.0.0.1:27017/wtwr_db', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true,
+  .connect('mongodb://127.0.0.1:27017/wtwr_db')
+  .then(() => {
+    console.log('Connected to MongoDB');
   })
-  .then(() => {})
   .catch((error) => {
     console.error('Error:', error); // Log or handle the error
   });
