@@ -19,8 +19,8 @@ const clothingItemschema = new mongoose.Schema({
   },
   owner: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'User', // Reference to the User model
-    required: true,
+    ref: 'User', // Reference to the User model (owner of the item)
+    required: true, // Ensures every clothing item must have an owner
   },
   likes: [
     {

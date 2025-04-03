@@ -4,4 +4,5 @@ module.exports = {
   STATUS_BAD_REQUEST: 400,
   STATUS_NOT_FOUND: 404,
   STATUS_INTERNAL_SERVER_ERROR: 500,
+  STATUS_CONFLICT: 409, // Added the conflict status
 };

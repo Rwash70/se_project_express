@@ -1,11 +1,19 @@
 const express = require('express');
-const { getUsers, getUser, createUser } = require('../controllers/users');
+const {
+  getUsers,
+  getCurrentUser,
+  updateUserProfile,
+} = require('../controllers/users'); // Import updateUserProfile
 
 const router = express.Router();
 
-// Removed 'users' from the path since it's already defined in app.js
+// GET /users — returns all users
 router.get('/', getUsers);
-router.get('/:userId', getUser);
-router.post('/', createUser);
+
+// GET /users/me - returns the current authenticated user
+router.get('/me', getCurrentUser);
+
+// PATCH /users/me — update the current user's profile (name and avatar)
+router.patch('/me', updateUserProfile); // New route for updating user profile
 
 module.exports = router;

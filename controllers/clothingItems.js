@@ -4,6 +4,7 @@ const {
   STATUS_BAD_REQUEST,
   STATUS_NOT_FOUND,
   STATUS_INTERNAL_SERVER_ERROR,
+  STATUS_FORBIDDEN, // Added STATUS_FORBIDDEN
 } = require('../utils/constants');
 const clothingItems = require('../models/clothingItems'); // Use lowercase 'clothingItems'
 
@@ -48,11 +49,21 @@ const createItem = async (req, res) => {
 // DELETE /items/:itemId — deletes an item by _id
 const deleteItem = async (req, res) => {
   try {
-    const item = await clothingItems.findByIdAndDelete(req.params.itemId);
+    const item = await clothingItems.findById(req.params.itemId);
 
     if (!item) {
       return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
     }
+
+    // Step 1: Check if the logged-in user is the owner of the item
+    if (item.owner.toString() !== req.user._id.toString()) {
+      return res.status(STATUS_FORBIDDEN).send({
+        message: 'You do not have permission to delete this item',
+      });
+    }
+
+    // Step 2: If the user is the owner, proceed with deletion
+    await clothingItems.findByIdAndDelete(req.params.itemId);
 
     return res.status(STATUS_OK).send({ message: 'Item deleted' });
   } catch (err) {
