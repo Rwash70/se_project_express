@@ -3,8 +3,9 @@ const mongoose = require('mongoose');
 const cors = require('cors'); // Import cors
 const { STATUS_NOT_FOUND } = require('./utils/constants'); // Import the constant
 
-const userRoutes = require('./routes/users');
+const userRoutes = require('./routes'); // Import routes from routes/index.js
 const clothingItemsRoutes = require('./routes/clothingItems');
+const { getItems } = require('./controllers/clothingItems'); // Import getItems controller
 const authMiddleware = require('./middlewares/auth'); // Import the auth middleware
 
 const app = express();
@@ -30,13 +31,18 @@ app.use(express.json());
 // Public routes (signin, signup, items) will not use the auth middleware
 app.use('/signin', userRoutes); // Sign in route is public
 app.use('/signup', userRoutes); // Sign up route is public
+
+// Public route for retrieving all items (before authMiddleware)
+app.get('/items', getItems); // Public route for getting all items
+
+// Items route is public (for creating, liking, deleting items)
 app.use('/items', clothingItemsRoutes); // Items route is public
 
 // Protected routes will use the auth middleware
 app.use(authMiddleware); // Apply the auth middleware globally for all routes below this line
 
+// Protected user routes (they will require authentication)
 app.use('/users', userRoutes); // All user routes are now protected by auth middleware
-app.use('/items', clothingItemsRoutes); // You can add other routes here
 
 // 404 handler for routes that don't exist
 app.use((req, res) => {

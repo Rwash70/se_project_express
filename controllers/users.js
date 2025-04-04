@@ -10,38 +10,21 @@ const {
 } = require('../utils/constants');
 const { JWT_SECRET } = require('../utils/config'); // Import the JWT secret
 
-// GET /users — returns all users
-const getUsers = async (req, res) => {
-  try {
-    const users = await User.find({});
-    res.status(200).send(users);
-  } catch (err) {
-    console.error(err);
-    res.status(STATUS_INTERNAL_SERVER_ERROR).send({
-      message: 'An error occurred while retrieving users',
-    });
-  }
-};
-
 // GET /users/me - returns the current authenticated user
 const getCurrentUser = async (req, res) => {
   try {
-    // Find the user using the ID from req.user (from the auth middleware)
     const user = await User.findById(req.user._id);
 
-    // If user is not found, return a 404 error
     if (!user) {
       return res.status(STATUS_NOT_FOUND).send({ message: 'User not found' });
     }
 
-    // Respond with the user data (excluding the password)
     return res.status(200).send({
       email: user.email,
       name: user.name,
       avatar: user.avatar,
     });
   } catch (err) {
-    // If there is an error, log it and send a 500 error response
     console.error(err);
     return res
       .status(STATUS_INTERNAL_SERVER_ERROR)
@@ -54,7 +37,6 @@ const updateUserProfile = async (req, res) => {
   const { name, avatar } = req.body;
 
   try {
-    // Check if at least one field is provided to update
     if (!name && !avatar) {
       return res.status(STATUS_BAD_REQUEST).send({
         message:
@@ -62,26 +44,28 @@ const updateUserProfile = async (req, res) => {
       });
     }
 
-    // Find the user by _id (this will be set in the req.user by the auth middleware)
     const user = await User.findById(req.user._id);
 
     if (!user) {
       return res.status(STATUS_NOT_FOUND).send({ message: 'User not found' });
     }
 
-    // Update the user's profile with the provided fields
     if (name) user.name = name;
     if (avatar) user.avatar = avatar;
 
-    // Save the updated user
     const updatedUser = await user.save();
 
-    // Return the updated user (excluding the password)
     return res.status(200).send({
       message: 'User profile updated successfully',
       user: { name: updatedUser.name, avatar: updatedUser.avatar },
     });
   } catch (err) {
+    if (err.name === 'ValidationError') {
+      return res.status(STATUS_BAD_REQUEST).send({
+        message: 'Invalid data format or missing required fields',
+      });
+    }
+
     console.error(err);
     return res
       .status(STATUS_INTERNAL_SERVER_ERROR)
@@ -96,14 +80,12 @@ const createUser = async (req, res) => {
   } = req.body;
 
   try {
-    // Validate that the email and password are provided
     if (!email || !password || !name || !avatar) {
       return res.status(STATUS_BAD_REQUEST).send({
         message: 'All fields (email, password, name, avatar) are required',
       });
     }
 
-    // Check if email is already in use (unique constraint)
     const existingUser = await User.findOne({ email });
     if (existingUser) {
       return res
@@ -111,11 +93,9 @@ const createUser = async (req, res) => {
         .send({ message: 'Email already in use' });
     }
 
-    // Hash the password before saving
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // Create the new user
     const user = await User.create({
       email,
       password: hashedPassword,
@@ -123,7 +103,6 @@ const createUser = async (req, res) => {
       avatar,
     });
 
-    // Exclude the password before sending the response
     const userWithoutPassword = user.toObject();
     delete userWithoutPassword.password;
 
@@ -151,6 +130,13 @@ const createUser = async (req, res) => {
 const login = async (req, res) => {
   const { email, password } = req.body;
 
+  // Check if email or password are missing
+  if (!email || !password) {
+    return res.status(STATUS_BAD_REQUEST).send({
+      message: 'Email and password are required',
+    });
+  }
+
   try {
     // Use the custom method to find user by credentials
     const user = await User.findUserByCredentials(email, password);
@@ -161,17 +147,23 @@ const login = async (req, res) => {
     // Send the token in the response
     return res.status(200).send({ token });
   } catch (err) {
-    // If the credentials are incorrect, send a 401 Unauthorized error
+    // Check if the error message is related to incorrect credentials
+    if (err.message === 'Incorrect email or password') {
+      return res
+        .status(STATUS_UNAUTHORIZED)
+        .send({ message: 'Incorrect email or password' });
+    }
+
+    // For any other error, return a 500 Internal Server Error
     return res
-      .status(STATUS_UNAUTHORIZED)
-      .send({ message: 'Incorrect email or password' });
+      .status(STATUS_INTERNAL_SERVER_ERROR)
+      .send({ message: 'Internal server error' });
   }
 };
 
 module.exports = {
-  getUsers,
   getCurrentUser,
   createUser,
   login,
-  updateUserProfile, // Export the new updateUserProfile controller
+  updateUserProfile,
 };

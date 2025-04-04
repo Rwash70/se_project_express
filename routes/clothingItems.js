@@ -1,6 +1,5 @@
 const express = require('express');
 const {
-  getItems,
   createItem,
   deleteItem,
   likeItem,
@@ -8,9 +7,6 @@ const {
 } = require('../controllers/clothingItems');
 
 const router = express.Router();
-
-// Route to get all items
-router.get('/', getItems);
 
 // Route to create a new item
 router.post('/', createItem);
