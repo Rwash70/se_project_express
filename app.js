@@ -1,57 +1,50 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors'); // Import cors
-const { STATUS_NOT_FOUND } = require('./utils/constants'); // Import the constant
+const cors = require('cors');
+const { STATUS_NOT_FOUND } = require('./utils/constants');
 
-const userRoutes = require('./routes'); // Import routes from routes/index.js
-const clothingItemsRoutes = require('./routes/clothingItems');
-const { getItems } = require('./controllers/clothingItems'); // Import getItems controller
-const authMiddleware = require('./middlewares/auth'); // Import the auth middleware
+const authRoutes = require('./routes'); // /signin, /signup
+const userRoutes = require('./routes/users'); // /users
+const clothingItemsRoutes = require('./routes/clothingItems'); // /items
+const { getItems } = require('./controllers/clothingItems');
+const authMiddleware = require('./middlewares/auth');
 
 const app = express();
-
 const { PORT = 3001 } = process.env;
 
-// Connect to MongoDB (removed deprecated options)
+// Connect to MongoDB
 mongoose
   .connect('mongodb://127.0.0.1:27017/wtwr_db')
-  .then(() => {
-    console.log('Connected to MongoDB');
-  })
-  .catch((error) => {
-    console.error('Error:', error); // Log or handle the error
-  });
+  .then(() => console.log('Connected to MongoDB'))
+  .catch((error) => console.error('Error:', error));
 
-// Enable CORS for all routes
+// Enable CORS
 app.use(cors());
 
-// Use express.json() to parse incoming JSON data
+// Parse incoming JSON
 app.use(express.json());
 
-// Public routes (signin, signup, items) will not use the auth middleware
-app.use('/signin', userRoutes); // Sign in route is public
-app.use('/signup', userRoutes); // Sign up route is public
+// Public auth routes
+app.use('/', authRoutes); // /signin and /signup
 
-// Public route for retrieving all items (before authMiddleware)
-app.get('/items', getItems); // Public route for getting all items
+// Public GET route for all items
+app.get('/items', getItems); // Only this is public
 
-// Items route is public (for creating, liking, deleting items)
-app.use('/items', clothingItemsRoutes); // Items route is public
+// Apply auth middleware for all protected routes
+app.use(authMiddleware);
 
-// Protected routes will use the auth middleware
-app.use(authMiddleware); // Apply the auth middleware globally for all routes below this line
+// Protected routes
+app.use('/items', clothingItemsRoutes); // POST, DELETE, LIKE (requires auth)
+app.use('/users', userRoutes); // User routes (requires auth)
 
-// Protected user routes (they will require authentication)
-app.use('/users', userRoutes); // All user routes are now protected by auth middleware
-
-// 404 handler for routes that don't exist
+// 404 Handler
 app.use((req, res) => {
   res
     .status(STATUS_NOT_FOUND)
     .send({ message: 'Requested resource not found' });
 });
 
-// Start the server on the specified port
+// Start server
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
