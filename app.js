@@ -27,10 +27,10 @@ app.use(express.json());
 // Public auth routes
 app.use('/', authRoutes); // /signin and /signup
 
-// Public GET route for all items
-app.get('/items', getItems); // Only this is public
+// Public GET route for all items (No auth required)
+app.get('/items', getItems); // Public route for fetching items
 
-// Apply auth middleware for all protected routes
+// Apply auth middleware for all protected routes (below)
 app.use(authMiddleware);
 
 // Protected routes

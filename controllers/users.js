@@ -75,9 +75,7 @@ const updateUserProfile = async (req, res) => {
 
 // POST /users — creates a new user
 const createUser = async (req, res) => {
-  const {
-    email, password, name, avatar,
-  } = req.body;
+  const { email, password, name, avatar } = req.body;
 
   try {
     if (!email || !password || !name || !avatar) {
