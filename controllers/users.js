@@ -23,6 +23,7 @@ const getCurrentUser = async (req, res) => {
       email: user.email,
       name: user.name,
       avatar: user.avatar,
+      id: user._id,
     });
   } catch (err) {
     console.error(err);

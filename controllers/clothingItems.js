@@ -1,10 +1,10 @@
 const {
   STATUS_OK,
-  STATUS_CREATED, // Added STATUS_CREATED
+  STATUS_CREATED,
   STATUS_BAD_REQUEST,
   STATUS_NOT_FOUND,
   STATUS_INTERNAL_SERVER_ERROR,
-  STATUS_FORBIDDEN, // Added STATUS_FORBIDDEN
+  STATUS_FORBIDDEN,
 } = require('../utils/constants');
 const clothingItems = require('../models/clothingItems'); // Use lowercase 'clothingItems'
 
@@ -29,10 +29,10 @@ const createItem = async (req, res) => {
       name,
       weather,
       imageUrl,
-      owner: req.user._id, // Assign the user's ID to the owner field
+      owner: req.user._id, // Ensure the user's ID is added to the owner field
     });
 
-    return res.status(STATUS_CREATED).send(newItem); // Ensure you return here
+    return res.status(STATUS_CREATED).send(newItem); // Return created item
   } catch (err) {
     if (err.name === 'ValidationError') {
       return res
@@ -54,19 +54,19 @@ const deleteItem = async (req, res) => {
     if (!item) {
       return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
     }
-
-    // Step 1: Check if the logged-in user is the owner of the item
+    console.log(item);
+    console.log(req.user);
+    // Ensure the logged-in user is the owner of the item
     if (item.owner.toString() !== req.user._id.toString()) {
       return res.status(STATUS_FORBIDDEN).send({
         message: 'You do not have permission to delete this item',
       });
     }
 
-    // Step 2: If the user is the owner, proceed with deletion
     await clothingItems.findByIdAndDelete(req.params.itemId);
-
     return res.status(STATUS_OK).send({ message: 'Item deleted' });
   } catch (err) {
+    console.log(err);
     if (err.name === 'CastError') {
       return res
         .status(STATUS_BAD_REQUEST)
@@ -79,15 +79,15 @@ const deleteItem = async (req, res) => {
   }
 };
 
-// PUT /items/:itemId/likes — like an item
+// PATCH /items/:itemId/likes — like an item
 const likeItem = async (req, res) => {
   try {
     const item = await clothingItems.findByIdAndUpdate(
       req.params.itemId,
       {
-        $addToSet: { likes: req.user._id }, // Added underscore to `id`
+        $addToSet: { likes: req.user._id }, // Prevent duplicate likes
       },
-      { new: true },
+      { new: true }
     );
 
     if (!item) {
@@ -96,7 +96,7 @@ const likeItem = async (req, res) => {
       });
     }
 
-    return res.status(STATUS_OK).send(item); // Explicitly return after sending response
+    return res.status(STATUS_OK).send(item); // Return the updated item with new likes
   } catch (err) {
     if (err.name === 'CastError') {
       return res
@@ -115,15 +115,15 @@ const dislikeItem = async (req, res) => {
   try {
     const item = await clothingItems.findByIdAndUpdate(
       req.params.itemId,
-      { $pull: { likes: req.user._id } }, // Added underscore to `id`
-      { new: true },
+      { $pull: { likes: req.user._id } }, // Remove the user from likes
+      { new: true }
     );
 
     if (!item) {
       return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
     }
 
-    return res.status(STATUS_OK).send(item); // Explicit return here
+    return res.status(STATUS_OK).send(item); // Return the updated item after unliking
   } catch (err) {
     if (err.name === 'CastError') {
       return res

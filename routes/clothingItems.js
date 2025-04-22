@@ -4,7 +4,7 @@ const {
   deleteItem,
   likeItem,
   dislikeItem,
-} = require('../controllers/clothingItems');
+} = require('../controllers/clothingItems'); // Assuming these functions are in the 'controllers/clothingItems.js' file
 
 const router = express.Router();
 
@@ -15,9 +15,9 @@ router.post('/', createItem);
 router.delete('/:itemId', deleteItem);
 
 // Route to like an item
-router.put('/:itemId/likes', likeItem);
+router.patch('/:itemId/like', likeItem); // Updated to PATCH from PUT
 
 // Route to unlike an item
-router.delete('/:itemId/likes', dislikeItem);
+router.delete('/:itemId/like', dislikeItem);
 
 module.exports = router;
