@@ -56,10 +56,14 @@ const updateUserProfile = async (req, res) => {
 
     const updatedUser = await user.save();
 
-    return res.status(200).send({
-      message: 'User profile updated successfully',
-      user: { name: updatedUser.name, avatar: updatedUser.avatar },
-    });
+    return res
+      .status(200)
+      .send({
+        name: updatedUser.name,
+        avatar: updatedUser.avatar,
+        email: updatedUser.email,
+        id: updatedUser._id,
+      });
   } catch (err) {
     if (err.name === 'ValidationError') {
       return res.status(STATUS_BAD_REQUEST).send({

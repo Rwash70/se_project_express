@@ -14,6 +14,7 @@ const getItems = async (req, res) => {
     const items = await clothingItems.find({});
     res.status(STATUS_OK).send(items);
   } catch (err) {
+    console.error(err);
     res
       .status(STATUS_INTERNAL_SERVER_ERROR)
       .send({ message: 'Internal server error' });
@@ -34,6 +35,7 @@ const createItem = async (req, res) => {
 
     return res.status(STATUS_CREATED).send(newItem); // Return created item
   } catch (err) {
+    console.error(err);
     if (err.name === 'ValidationError') {
       return res
         .status(STATUS_BAD_REQUEST)
@@ -54,8 +56,7 @@ const deleteItem = async (req, res) => {
     if (!item) {
       return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
     }
-    console.log(item);
-    console.log(req.user);
+
     // Ensure the logged-in user is the owner of the item
     if (item.owner.toString() !== req.user._id.toString()) {
       return res.status(STATUS_FORBIDDEN).send({
@@ -66,7 +67,7 @@ const deleteItem = async (req, res) => {
     await clothingItems.findByIdAndDelete(req.params.itemId);
     return res.status(STATUS_OK).send({ message: 'Item deleted' });
   } catch (err) {
-    console.log(err);
+    console.error(err);
     if (err.name === 'CastError') {
       return res
         .status(STATUS_BAD_REQUEST)
@@ -98,6 +99,7 @@ const likeItem = async (req, res) => {
 
     return res.status(STATUS_OK).send(item); // Return the updated item with new likes
   } catch (err) {
+    console.error(err);
     if (err.name === 'CastError') {
       return res
         .status(STATUS_BAD_REQUEST)
@@ -125,6 +127,7 @@ const dislikeItem = async (req, res) => {
 
     return res.status(STATUS_OK).send(item); // Return the updated item after unliking
   } catch (err) {
+    console.error(err);
     if (err.name === 'CastError') {
       return res
         .status(STATUS_BAD_REQUEST)
