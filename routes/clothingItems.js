@@ -4,20 +4,21 @@ const {
   deleteItem,
   likeItem,
   dislikeItem,
-} = require('../controllers/clothingItems'); // Assuming these functions are in the 'controllers/clothingItems.js' file
+} = require('../controllers/clothingItems');
+
+const {
+  validateClothingItem,
+  validateItemId,
+} = require('../middlewares/validation'); // adjust the path if needed
 
 const router = express.Router();
 
-// Route to create a new item
-router.post('/', createItem);
+// Route to create a new item with body validation
+router.post('/', validateClothingItem, createItem);
 
-// Route to delete an item by itemId
-router.delete('/:itemId', deleteItem);
-
-// Route to like an item
-router.patch('/:itemId/likes', likeItem); // Updated to PATCH from PUT
-
-// Route to unlike an item
-router.delete('/:itemId/likes', dislikeItem);
+// Routes using :itemId param — validate the ID format
+router.delete('/:itemId', validateItemId, deleteItem);
+router.patch('/:itemId/likes', validateItemId, likeItem);
+router.delete('/:itemId/likes', validateItemId, dislikeItem);
 
 module.exports = router;
