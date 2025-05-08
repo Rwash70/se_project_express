@@ -34,9 +34,9 @@ API testing and security best practices
 
 Before committing your code, make sure you edit the file `sprint.txt` in the root folder. The file `sprint.txt` should contain the number of the sprint you're currently working on. For ex. 12
 
-# Solunaverse Lab App
+# Solunaverse Project
 
-The **Solunaverse Lab App** is a secure, scalable web application hosted on [solunaverse.com](https://solunaverse.com). This application offers an interactive lab environment and is built to support modern deployments using NGINX, Node.js, and security best practices.
+The Solunaverse is a secure, scalable web application hosted on [solunaverse.com](https://solunaverse.com). This application offers an interactive environment and is built to support modern deployments using NGINX, Node.js, and security best practices.
 
 ---
 
@@ -64,6 +64,6 @@ Follow these steps to run the application locally:
 ### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/your-username/solunaverse-lab-app.git
-cd solunaverse-lab-app
+git clone https://github.com/your-username/solunaverse-project-app.git
+cd solunaverse-project-app
 ```
