@@ -60,10 +60,3 @@ Visit the app here:
 ## Installation
 
 Follow these steps to run the application locally:
-
-### 1. Clone the Repository
-
-```bash
-git clone https://github.com/your-username/solunaverse-project-app.git
-cd solunaverse-project-app
-```
