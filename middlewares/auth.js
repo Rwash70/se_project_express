@@ -1,21 +1,19 @@
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../utils/config');
-const { STATUS_UNAUTHORIZED } = require('../utils/constants');
+
+// Custom error class
+const { UnauthorizedError } = require('../errors/customErrors');
 
 // Middleware to check the authorization token
 const auth = (req, res, next) => {
   const { authorization } = req.headers;
 
   if (!authorization) {
-    return res
-      .status(STATUS_UNAUTHORIZED)
-      .send({ message: 'Authorization required' });
+    throw new UnauthorizedError('Authorization required');
   }
 
   if (!authorization.startsWith('Bearer ')) {
-    return res
-      .status(STATUS_UNAUTHORIZED)
-      .send({ message: 'Authorization token must be in Bearer format' });
+    throw new UnauthorizedError('Authorization token must be in Bearer format');
   }
 
   const token = authorization.replace('Bearer ', '');
@@ -26,10 +24,10 @@ const auth = (req, res, next) => {
     return next();
   } catch (err) {
     if (err.name === 'TokenExpiredError') {
-      return res.status(STATUS_UNAUTHORIZED).send({ message: 'Token expired' });
+      throw new UnauthorizedError('Token expired');
     }
 
-    return res.status(STATUS_UNAUTHORIZED).send({ message: 'Unauthorized' });
+    throw new UnauthorizedError('Unauthorized');
   }
 };
 

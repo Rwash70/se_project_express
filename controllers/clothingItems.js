@@ -1,3 +1,4 @@
+const mongoose = require('mongoose');
 const {
   STATUS_OK,
   STATUS_CREATED,
@@ -6,34 +7,40 @@ const {
   STATUS_INTERNAL_SERVER_ERROR,
   STATUS_FORBIDDEN,
 } = require('../utils/constants');
-const clothingItems = require('../models/clothingItems'); // Use lowercase 'clothingItems'
+const clothingItems = require('../models/clothingItems');
 
 // GET /items — returns all clothing items
-const getItems = async (req, res) => {
+const getItems = async (req, res, next) => {
   try {
     const items = await clothingItems.find({});
     res.status(STATUS_OK).send(items);
   } catch (err) {
-    console.error(err);
-    res
-      .status(STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Internal server error' });
+    if (process.env.NODE_ENV !== 'production') {
+      console.error(err);
+    }
+    next(new InternalServerError('Internal server error')); // res
+    //   .status(STATUS_INTERNAL_SERVER_ERROR)
+    //   .send({ message: 'Internal server error' });
   }
 };
 
-// POST /items — creates a new item
 const createItem = async (req, res) => {
-  const { name, weather, imageUrl } = req.body;
+  const { name, weather, imageUrl } = req.body || {};
+  if (!name || !weather || !imageUrl) {
+    return res
+      .status(STATUS_BAD_REQUEST)
+      .send({ message: 'Missing required fields' });
+  }
 
   try {
     const newItem = await clothingItems.create({
       name,
       weather,
       imageUrl,
-      owner: req.user._id, // Ensure the user's ID is added to the owner field
+      owner: req.user._id,
     });
 
-    return res.status(STATUS_CREATED).send(newItem); // Return created item
+    return res.status(STATUS_CREATED).send(newItem);
   } catch (err) {
     console.error(err);
     if (err.name === 'ValidationError') {
@@ -48,8 +55,11 @@ const createItem = async (req, res) => {
   }
 };
 
-// DELETE /items/:itemId — deletes an item by _id
 const deleteItem = async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
+    return res.status(STATUS_BAD_REQUEST).send({ message: 'Invalid item ID' });
+  }
+
   try {
     const item = await clothingItems.findById(req.params.itemId);
 
@@ -57,11 +67,10 @@ const deleteItem = async (req, res) => {
       return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
     }
 
-    // Ensure the logged-in user is the owner of the item
     if (item.owner.toString() !== req.user._id.toString()) {
-      return res.status(STATUS_FORBIDDEN).send({
-        message: 'You do not have permission to delete this item',
-      });
+      return res
+        .status(STATUS_FORBIDDEN)
+        .send({ message: 'You do not have permission to delete this item' });
     }
 
     await clothingItems.findByIdAndDelete(req.params.itemId);
@@ -74,50 +83,21 @@ const deleteItem = async (req, res) => {
         .send({ message: 'Invalid item ID' });
     }
 
-    return res.status(STATUS_INTERNAL_SERVER_ERROR).send({
-      message: 'An error occurred while deleting the item',
-    });
+    return res
+      .status(STATUS_INTERNAL_SERVER_ERROR)
+      .send({ message: 'An error occurred while deleting the item' });
   }
 };
 
-// PATCH /items/:itemId/likes — like an item
 const likeItem = async (req, res) => {
-  try {
-    const item = await clothingItems.findByIdAndUpdate(
-      req.params.itemId,
-      {
-        $addToSet: { likes: req.user._id }, // Prevent duplicate likes
-      },
-      { new: true }
-    );
-
-    if (!item) {
-      return res.status(STATUS_NOT_FOUND).send({
-        message: 'Item not found',
-      });
-    }
-
-    return res.status(STATUS_OK).send(item); // Return the updated item with new likes
-  } catch (err) {
-    console.error(err);
-    if (err.name === 'CastError') {
-      return res
-        .status(STATUS_BAD_REQUEST)
-        .send({ message: 'Invalid item ID' });
-    }
-
-    return res.status(STATUS_INTERNAL_SERVER_ERROR).send({
-      message: 'An error occurred while liking the item',
-    });
+  if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
+    return res.status(STATUS_BAD_REQUEST).send({ message: 'Invalid item ID' });
   }
-};
 
-// DELETE /items/:itemId/likes — unlike an item
-const dislikeItem = async (req, res) => {
   try {
     const item = await clothingItems.findByIdAndUpdate(
       req.params.itemId,
-      { $pull: { likes: req.user._id } }, // Remove the user from likes
+      { $addToSet: { likes: req.user._id } },
       { new: true }
     );
 
@@ -125,7 +105,7 @@ const dislikeItem = async (req, res) => {
       return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
     }
 
-    return res.status(STATUS_OK).send(item); // Return the updated item after unliking
+    return res.status(STATUS_OK).send(item);
   } catch (err) {
     console.error(err);
     if (err.name === 'CastError') {
@@ -134,9 +114,40 @@ const dislikeItem = async (req, res) => {
         .send({ message: 'Invalid item ID' });
     }
 
-    return res.status(STATUS_INTERNAL_SERVER_ERROR).send({
-      message: 'An error occurred while unliking the item',
-    });
+    return res
+      .status(STATUS_INTERNAL_SERVER_ERROR)
+      .send({ message: 'An error occurred while liking the item' });
+  }
+};
+
+const dislikeItem = async (req, res) => {
+  if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
+    return res.status(STATUS_BAD_REQUEST).send({ message: 'Invalid item ID' });
+  }
+
+  try {
+    const item = await clothingItems.findByIdAndUpdate(
+      req.params.itemId,
+      { $pull: { likes: req.user._id } },
+      { new: true }
+    );
+
+    if (!item) {
+      return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
+    }
+
+    return res.status(STATUS_OK).send(item);
+  } catch (err) {
+    console.error(err);
+    if (err.name === 'CastError') {
+      return res
+        .status(STATUS_BAD_REQUEST)
+        .send({ message: 'Invalid item ID' });
+    }
+
+    return res
+      .status(STATUS_INTERNAL_SERVER_ERROR)
+      .send({ message: 'An error occurred while unliking the item' });
   }
 };
 

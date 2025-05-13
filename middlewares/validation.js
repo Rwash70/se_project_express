@@ -15,13 +15,14 @@ const validateClothingItem = celebrate({
         return value;
       })
       .required(),
+    weather: Joi.string().valid('hot', 'warm', 'cold').required(), // weather added as required
   }),
 });
 
 // 2. Validate user info body when a user is created
 const validateUserInfo = celebrate({
   body: Joi.object({
-    username: Joi.string().min(2).max(30).required(),
+    name: Joi.string().min(2).max(30).required(), // Corrected field name
     avatar: Joi.string()
       .custom((value, helpers) => {
         if (!validator.isURL(value)) {
