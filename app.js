@@ -3,22 +3,22 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
-const { STATUS_NOT_FOUND } = require('./utils/constants');
-const { NotFoundError } = require('./errors/customErrors');
+const { errors } = require('celebrate'); // Moved up (external before local)
 
+const { NotFoundError } = require('./errors');
 const authRoutes = require('./routes'); // /signin, /signup
 const userRoutes = require('./routes/users'); // /users
 const clothingItemsRoutes = require('./routes/clothingItems'); // /items
 const { getItems } = require('./controllers/clothingItems');
 const authMiddleware = require('./middlewares/auth');
-const { requestLogger, errorLogger } = require('./middlewares/logger'); // Loggers
-const { errors } = require('celebrate');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 const { PORT = 3001 } = process.env;
 
-// Connect to MongoDB
+// ✅ Connect to MongoDB with error catch
 mongoose.connect('mongodb://127.0.0.1:27017/wtwr_db').catch((error) => {
+  // eslint-disable-next-line no-console
   console.error('Error connecting to MongoDB:', error);
 });
 
@@ -44,9 +44,9 @@ app.use(authMiddleware);
 app.use('/items', clothingItemsRoutes); // Requires auth
 app.use('/users', userRoutes); // Requires auth
 
-// Middleware for unknown routes (404) - must come before error logger
-app.use((req, res, next) => {
-  next(new NotFoundError('Requested resource not found'));
+// Middleware for unknown routes (404)
+app.use(() => {
+  throw new NotFoundError('Requested resource not found');
 });
 
 // Error logger after all route handlers
@@ -55,8 +55,8 @@ app.use(errorLogger);
 // Celebrate validation error handler
 app.use(errors());
 
-// Centralized error handler
-const errorHandler = (err, req, res, next) => {
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
   const { statusCode = 500, message } = err;
 
   res.status(statusCode).send({
@@ -65,8 +65,7 @@ const errorHandler = (err, req, res, next) => {
         ? 'Something went wrong, please try again later'
         : message,
   });
-};
+});
 
-app.use(errorHandler);
-
+// No unnecessary console.log
 app.listen(PORT, '0.0.0.0');

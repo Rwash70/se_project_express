@@ -9,7 +9,7 @@ const {
   NotFoundError,
   ConflictError,
   UnauthorizedError,
-} = require('../errors/customErrors');
+} = require('../errors');
 
 // GET /users/me - returns the current authenticated user
 const getCurrentUser = async (req, res, next) => {
@@ -27,7 +27,8 @@ const getCurrentUser = async (req, res, next) => {
       id: user._id,
     });
   } catch (err) {
-    next(err);
+    next(err); // Ensure error is passed to next middleware
+    return null; // Explicit return for ESLint
   }
 };
 
@@ -38,7 +39,7 @@ const updateUserProfile = async (req, res, next) => {
   try {
     if (!name && !avatar) {
       throw new BadRequestError(
-        'You must provide at least one field (name or avatar) to update.'
+        'You must provide at least one field (name or avatar) to update.',
       );
     }
 
@@ -61,21 +62,24 @@ const updateUserProfile = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       return next(
-        new BadRequestError('Invalid data format or missing required fields')
+        new BadRequestError('Invalid data format or missing required fields'),
       );
     }
-    next(err);
+    next(err); // Ensure error is passed to next middleware
+    return null; // Explicit return for ESLint
   }
 };
 
 // POST /users — creates a new user
 const createUser = async (req, res, next) => {
-  const { email, password, name, avatar } = req.body;
+  const {
+    email, password, name, avatar,
+  } = req.body;
 
   try {
     if (!email || !password || !name || !avatar) {
       throw new BadRequestError(
-        'All fields (email, password, name, avatar) are required'
+        'All fields (email, password, name, avatar) are required',
       );
     }
 
@@ -108,10 +112,11 @@ const createUser = async (req, res, next) => {
   } catch (err) {
     if (err.name === 'ValidationError') {
       return next(
-        new BadRequestError('Invalid data format or missing required fields')
+        new BadRequestError('Invalid data format or missing required fields'),
       );
     }
-    next(err);
+    next(err); // Ensure error is passed to next middleware
+    return null; // Explicit return for ESLint
   }
 };
 
@@ -133,7 +138,8 @@ const login = async (req, res, next) => {
     if (err.message === 'Incorrect email or password') {
       return next(new UnauthorizedError('Incorrect email or password'));
     }
-    next(err);
+    next(err); // Ensure error is passed to next middleware
+    return null; // Explicit return for ESLint
   }
 };
 

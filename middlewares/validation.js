@@ -57,10 +57,25 @@ const validateItemId = celebrate({
   }),
 });
 
+const validateUserProfileUpdate = celebrate({
+  body: Joi.object({
+    name: Joi.string().min(2).max(30).required(),
+    avatar: Joi.string()
+      .custom((value, helpers) => {
+        if (!validator.isURL(value)) {
+          return helpers.message('Invalid avatar URL format');
+        }
+        return value;
+      })
+      .required(),
+  }),
+});
+
 module.exports = {
   validateClothingItem,
   validateUserInfo,
   validateLogin,
   validateId,
   validateItemId,
+  validateUserProfileUpdate,
 };

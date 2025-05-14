@@ -8,6 +8,7 @@ const {
   STATUS_FORBIDDEN,
 } = require('../utils/constants');
 const clothingItems = require('../models/clothingItems');
+const InternalServerError = require('../errors/InternalServerError');
 
 // GET /items — returns all clothing items
 const getItems = async (req, res, next) => {
@@ -98,7 +99,7 @@ const likeItem = async (req, res) => {
     const item = await clothingItems.findByIdAndUpdate(
       req.params.itemId,
       { $addToSet: { likes: req.user._id } },
-      { new: true }
+      { new: true },
     );
 
     if (!item) {
@@ -129,7 +130,7 @@ const dislikeItem = async (req, res) => {
     const item = await clothingItems.findByIdAndUpdate(
       req.params.itemId,
       { $pull: { likes: req.user._id } },
-      { new: true }
+      { new: true },
     );
 
     if (!item) {
