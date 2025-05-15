@@ -27,8 +27,7 @@ const getCurrentUser = async (req, res, next) => {
       id: user._id,
     });
   } catch (err) {
-    next(err); // Ensure error is passed to next middleware
-    return null; // Explicit return for ESLint
+    return next(err); // added return here, removed return null
   }
 };
 
@@ -65,8 +64,7 @@ const updateUserProfile = async (req, res, next) => {
         new BadRequestError('Invalid data format or missing required fields'),
       );
     }
-    next(err); // Ensure error is passed to next middleware
-    return null; // Explicit return for ESLint
+    return next(err); // added return here, removed return null
   }
 };
 
@@ -115,8 +113,7 @@ const createUser = async (req, res, next) => {
         new BadRequestError('Invalid data format or missing required fields'),
       );
     }
-    next(err); // Ensure error is passed to next middleware
-    return null; // Explicit return for ESLint
+    return next(err); // added return here, removed return null
   }
 };
 
@@ -138,8 +135,7 @@ const login = async (req, res, next) => {
     if (err.message === 'Incorrect email or password') {
       return next(new UnauthorizedError('Incorrect email or password'));
     }
-    next(err); // Ensure error is passed to next middleware
-    return null; // Explicit return for ESLint
+    return next(err); // added return here, removed return null
   }
 };
 

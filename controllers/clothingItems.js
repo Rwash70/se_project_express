@@ -1,14 +1,12 @@
 const mongoose = require('mongoose');
-const {
-  STATUS_OK,
-  STATUS_CREATED,
-  STATUS_BAD_REQUEST,
-  STATUS_NOT_FOUND,
-  STATUS_INTERNAL_SERVER_ERROR,
-  STATUS_FORBIDDEN,
-} = require('../utils/constants');
+const { STATUS_OK, STATUS_CREATED } = require('../utils/constants');
 const clothingItems = require('../models/clothingItems');
-const InternalServerError = require('../errors/InternalServerError');
+const {
+  BadRequestError,
+  NotFoundError,
+  ForbiddenError,
+  InternalServerError,
+} = require('../errors');
 
 // GET /items — returns all clothing items
 const getItems = async (req, res, next) => {
@@ -19,18 +17,16 @@ const getItems = async (req, res, next) => {
     if (process.env.NODE_ENV !== 'production') {
       console.error(err);
     }
-    next(new InternalServerError('Internal server error')); // res
-    //   .status(STATUS_INTERNAL_SERVER_ERROR)
-    //   .send({ message: 'Internal server error' });
+    next(new InternalServerError('Internal server error'));
   }
 };
 
-const createItem = async (req, res) => {
+// POST /items — create a new clothing item
+const createItem = async (req, res, next) => {
   const { name, weather, imageUrl } = req.body || {};
   if (!name || !weather || !imageUrl) {
-    return res
-      .status(STATUS_BAD_REQUEST)
-      .send({ message: 'Missing required fields' });
+    // Instead of returning response here, throw error to be handled centrally
+    return next(new BadRequestError('Missing required fields'));
   }
 
   try {
@@ -40,59 +36,50 @@ const createItem = async (req, res) => {
       imageUrl,
       owner: req.user._id,
     });
-
     return res.status(STATUS_CREATED).send(newItem);
   } catch (err) {
-    console.error(err);
     if (err.name === 'ValidationError') {
-      return res
-        .status(STATUS_BAD_REQUEST)
-        .send({ message: 'Invalid item data' });
+      return next(new BadRequestError('Invalid item data'));
     }
-
-    return res
-      .status(STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'Failed to create item' });
+    return next(new InternalServerError('Failed to create item'));
   }
 };
 
-const deleteItem = async (req, res) => {
+// DELETE /items/:itemId — delete a clothing item
+const deleteItem = async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
-    return res.status(STATUS_BAD_REQUEST).send({ message: 'Invalid item ID' });
+    return next(new BadRequestError('Invalid item ID'));
   }
 
   try {
     const item = await clothingItems.findById(req.params.itemId);
 
     if (!item) {
-      return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
+      return next(new NotFoundError('Item not found'));
     }
 
     if (item.owner.toString() !== req.user._id.toString()) {
-      return res
-        .status(STATUS_FORBIDDEN)
-        .send({ message: 'You do not have permission to delete this item' });
+      return next(
+        new ForbiddenError('You do not have permission to delete this item'),
+      );
     }
 
     await clothingItems.findByIdAndDelete(req.params.itemId);
     return res.status(STATUS_OK).send({ message: 'Item deleted' });
   } catch (err) {
-    console.error(err);
     if (err.name === 'CastError') {
-      return res
-        .status(STATUS_BAD_REQUEST)
-        .send({ message: 'Invalid item ID' });
+      return next(new BadRequestError('Invalid item ID'));
     }
-
-    return res
-      .status(STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'An error occurred while deleting the item' });
+    return next(
+      new InternalServerError('An error occurred while deleting the item'),
+    );
   }
 };
 
-const likeItem = async (req, res) => {
+// PUT /items/:itemId/like — like a clothing item
+const likeItem = async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
-    return res.status(STATUS_BAD_REQUEST).send({ message: 'Invalid item ID' });
+    return next(new BadRequestError('Invalid item ID'));
   }
 
   try {
@@ -103,27 +90,24 @@ const likeItem = async (req, res) => {
     );
 
     if (!item) {
-      return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
+      return next(new NotFoundError('Item not found'));
     }
 
     return res.status(STATUS_OK).send(item);
   } catch (err) {
-    console.error(err);
     if (err.name === 'CastError') {
-      return res
-        .status(STATUS_BAD_REQUEST)
-        .send({ message: 'Invalid item ID' });
+      return next(new BadRequestError('Invalid item ID'));
     }
-
-    return res
-      .status(STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'An error occurred while liking the item' });
+    return next(
+      new InternalServerError('An error occurred while liking the item'),
+    );
   }
 };
 
-const dislikeItem = async (req, res) => {
+// PUT /items/:itemId/dislike — dislike a clothing item
+const dislikeItem = async (req, res, next) => {
   if (!mongoose.Types.ObjectId.isValid(req.params.itemId)) {
-    return res.status(STATUS_BAD_REQUEST).send({ message: 'Invalid item ID' });
+    return next(new BadRequestError('Invalid item ID'));
   }
 
   try {
@@ -134,21 +118,17 @@ const dislikeItem = async (req, res) => {
     );
 
     if (!item) {
-      return res.status(STATUS_NOT_FOUND).send({ message: 'Item not found' });
+      return next(new NotFoundError('Item not found'));
     }
 
     return res.status(STATUS_OK).send(item);
   } catch (err) {
-    console.error(err);
     if (err.name === 'CastError') {
-      return res
-        .status(STATUS_BAD_REQUEST)
-        .send({ message: 'Invalid item ID' });
+      return next(new BadRequestError('Invalid item ID'));
     }
-
-    return res
-      .status(STATUS_INTERNAL_SERVER_ERROR)
-      .send({ message: 'An error occurred while unliking the item' });
+    return next(
+      new InternalServerError('An error occurred while unliking the item'),
+    );
   }
 };
 
